@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Awesome debugger</title>
+
+  <link href="./screen.css" rel="stylesheet" />
+  <link href="./custom.css" rel="stylesheet" />
+  <link href="./styles.css" rel="stylesheet" />
+
+  <style>
+    #chart {
+      max-width: 650px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container" style="width: 650px">
+  <h1>Awesome debugger</h1>
+
+    <h2>Logs</h2>
+    <div id="containerLogs" style="width:650px;height:300px;border:1px solid grey"></div>
+    <br/>
+    <h2>Terminal</h2>
+    <div id="containerEdit" style="width:650px;height:50px;border:1px solid grey"></div>
+    <p>Press Enter to submit command.</p>
+  </div>
+
+  <script src="node_modules/monaco-editor/min/vs/loader.js"></script>
+  <script>
+
+var action = {
+  'set': 's',
+  'get': 'g',
+};
+
+var atmega328p = {
+  'PINB'  : '23',
+  'DDRB'  : '24',
+  'PORTB' : '25',
+  'PINC'  : '26',
+  'DDRC'  : '27',
+  'PORTC' : '28',
+  'PIND'  : '29',
+  'DDRD'  : '2A',
+  'PORTD' : '2B',
+  'TIFR0' : '35',
+  'TIFR1' : '36',
+  'TIFR2' : '37',
+  'PCIFR' : '3B',
+  'EIFR'  : '3C',
+  'EIMSK' : '3D',
+  'GPIOR0': '3E',
+  'EECR'  : '3F',
+  'EEDR'  : '40',
+  'EEARL' : '41',
+  'EEARH' : '42',
+  'GTCCR' : '43',
+  'TCCR0A': '44',
+  'TCCR0B': '45',
+  'TCNT0' : '46',
+  'OCR0A' : '47',
+  'OCR0B' : '48',
+  'GPIOR1': '4A',
+  'GPIOR2': '4B',
+  'SPCR'  : '4C',
+  'SPSR'  : '4D',
+  'SPDR'  : '4E',
+  'ACSR'  : '50',
+  'SMCR'  : '53',
+  'MCUSR' : '54',
+  'MCUCR' : '55',
+  'SPMCSR': '57',
+  'SPL'   : '5D',
+  'SPH'   : '5E',
+  'SREG'  : '5F',
+  'WDTCSR': '60',
+  'CLKPR' : '61',
+  'PRR'   : '64',
+  'OSCCAL': '66',
+  'PCICR' : '68',
+  'EICRA' : '69',
+  'PCMSK0': '6B',
+  'PCMSK1': '6C',
+  'PCMSK2': '6D',
+  'TIMSK0': '6E',
+  'TIMSK1': '6F',
+  'TIMSK2': '70',
+  'ADCL'  : '78',
+  'ADCH'  : '79',
+  'ADCSRA': '7A',
+  'ADCSRB': '7B',
+  'ADCSRC': '7C',
+  'DIDR0' : '7E',
+  'DIDR1' : '7F',
+  'TCCR1A': '80',
+  'TCCR1B': '81',
+  'TCCR1C': '82',
+  'TCNT1L': '84',
+  'TCNT1H': '85',
+  'ICR1L' : '86',
+  'ICR1H' : '87',
+  'OCR1AL': '88',
+  'OCR1AH': '89',
+  'OCR1BL': '8A',
+  'OCR1BH': '8B',
+  'TCCR2A': 'B0',
+  'TCCR2B': 'B1',
+  'TCNT2' : 'B2',
+  'OCR2A' : 'B3',
+  'OCR2B' : 'B4',
+  'ASSR'  : 'B6',
+  'TWBR'  : 'B8',
+  'TWSR'  : 'B9',
+  'TWAR'  : 'BA',
+  'TWDR'  : 'BB',
+  'TWCR'  : 'BC',
+  'TWAMR' : 'BD',
+  'UCSR0A': 'C0',
+  'UCSR0B': 'C1',
+  'UCSR0C': 'C2',
+  'UBRR0L': 'C4',
+  'UBRR0H': 'C5',
+  'UDR0'  : 'C6',
+};
+
+var logEditor, commandEditor;
+
+const SerialPort = require.__$__nodeRequire('serialport')
+const port = new SerialPort('/dev/ttyUSB0', {
+  baudRate: 9600
+})
+
+require.config({ paths: { 'vs': 'node_modules/monaco-editor/min/vs' }});
+require(['vs/editor/editor.main'], function() {
+  logEditor = monaco.editor.create(document.getElementById('containerLogs'), {
+    value: '',
+    language: 'text',
+    theme: 'vs-dark',
+    lineNumbers: false,
+    readOnly: true,
+    minimap: {enabled: false},
+  });
+});
+
+require(['vs/editor/editor.main'], function() {
+  commandEditor = monaco.editor.create(document.getElementById('containerEdit'), {
+    value: [
+      'set PORTB 20'
+    ].join('\n'),
+    language: 'text',
+    theme: 'vs-dark',
+    lineNumbers: false,
+    minimap: {enabled: false},
+  });
+  commandEditor.addCommand(monaco.KeyCode.Enter, function() {
+    const text = commandEditor.getValue();
+    logEditor.setValue( logEditor.getValue() + text + '\n');
+    commandEditor.setValue('');
+
+    const words = text.split(' ');
+    port.write(action[words[0]] + ' ' + atmega328p[words[1]] + ' ' + words[2] + '\n');
+
+  });
+});
+  </script>
+</body>
+</html>

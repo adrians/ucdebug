@@ -1,0 +1,1 @@
+void dbg_init();

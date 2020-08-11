@@ -1,0 +1,12 @@
+{
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {
+    "electron": "9.x",
+    "electron-rebuild": "^1.11.0",
+    "monaco-editor": "^0.20.0",
+    "serialport": "8.x"
+  }
+}
